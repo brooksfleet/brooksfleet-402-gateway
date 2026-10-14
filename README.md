@@ -259,6 +259,11 @@ rules:
   Your private key and recovery phrase never touch the server, a repository or a ticket.
 - **Avoid exchange deposit addresses.** They are often credited on one chain only; USDC
   arriving on another can be lost.
+- **Receive USDC once on every network you accept, before you go live.** A payment needs a
+  USDC account at your address to land in; the wallet creates it with the first USDC it
+  receives there. Until then every payment fails — on Solana the payer sees
+  `invalid_exact_svm_transaction_simulation_failed`. On testnet, send yourself faucet USDC
+  once; on mainnet, a small real amount.
 
 ### Step by step
 
@@ -291,6 +296,31 @@ network or a bad price fails at startup — not as a 500 on the first crawler.
 
 In the Next.js proxy, payment is verified and settled **before** your page renders. In
 Express, settlement follows x402's middleware behaviour.
+
+**Behind a reverse proxy or in a container**, x402 names the paid resource after the
+request URL the app sees — often an internal host such as `http://<container-id>:3000/`.
+Payers then see the wrong URL, and your infrastructure shows in a public header. In
+Next.js, hand the gateway a copy of the request on your public origin:
+
+```ts
+// proxy.ts
+import { createGatewayProxy } from 'brooksfleet-402-gateway/next';
+import { NextRequest } from 'next/server';
+
+const gateway = createGatewayProxy(options);
+
+export async function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  const publicRequest = new NextRequest(new URL(`${pathname}${search}`, 'https://example.com'), {
+    method: request.method,
+    headers: request.headers,
+  });
+  return gateway(publicRequest);
+}
+```
+
+In Express, set `app.set('trust proxy', true)` and forward `Host` and `X-Forwarded-Proto`
+from the proxy.
 
 ## Options
 
