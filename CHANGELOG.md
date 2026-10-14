@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1
+
+- README: bundled builds (Next.js, webpack, esbuild) need every x402 peer installed, including
+  `@x402/evm`, `@x402/svm` and `@solana/kit`, even for networks you don't accept.
+- README: use `@solana/kit` 6.8 or newer with TypeScript 6.
+- First release published by CI through npm Trusted Publishing, with provenance.
+
 ## 0.1.0
 
 First release.
