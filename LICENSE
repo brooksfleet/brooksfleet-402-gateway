@@ -1,21 +1,60 @@
-MIT License
+Brooksfleet Source-Available License 1.0
 
-Copyright (c) 2026 Brooksfleet LLC
+Copyright (c) 2026 Brooksfleet LLC. All rights reserved, except as granted below.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+"Software" means brooksfleet-402-gateway, in source or compiled form, including its
+documentation, as published by Brooksfleet LLC ("Brooksfleet").
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Grant
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+   Subject to these terms, Brooksfleet grants you a worldwide, non-exclusive,
+   royalty-free, non-transferable licence to:
+
+   (a) download, install and use the Software, unmodified, as a dependency of your own
+       applications and services, including commercial ones; and
+
+   (b) distribute the Software, unmodified, only as an embedded part of such an
+       application (for example inside a built bundle or a container image), provided
+       this licence and the copyright notice remain included.
+
+   Configuring the Software through its documented options, and automated
+   transformation by build tools (transpiling, bundling, minifying, tree-shaking), is
+   not a modification.
+
+2. Restrictions
+
+   You may not:
+
+   (a) modify, adapt, translate or create derivative works of the Software;
+   (b) publish, distribute, sublicense, sell or rent the Software, or any modified
+       version of it, other than as permitted in section 1(b);
+   (c) publish a fork of the Software, or a package substantially based on it;
+   (d) remove or alter any licence, copyright or attribution notice.
+
+3. Feature requests and feedback
+
+   Requests for features, fixes and enhancements go to
+   https://github.com/brooksfleet/brooksfleet-402-gateway/issues. Brooksfleet decides
+   what is implemented and when. If you send suggestions, ideas or code, you grant
+   Brooksfleet a perpetual, irrevocable, royalty-free right to use them in any way,
+   without obligation to you.
+
+4. Termination
+
+   Your rights under this licence end automatically if you breach it. On termination
+   you must stop using and distributing the Software.
+
+5. No warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+   PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+6. Limitation of liability
+
+   IN NO EVENT SHALL BROOKSFLEET OR ITS CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR ITS USE, INCLUDING ANY PAYMENT LOST,
+   MISROUTED OR NOT RECEIVED.
+
+All rights not expressly granted are reserved by Brooksfleet.

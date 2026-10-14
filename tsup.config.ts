@@ -7,14 +7,14 @@ export default defineConfig([
     dts: true,
     clean: true,
     sourcemap: true,
-    target: 'node20',
+    target: 'node22',
     // Frameworks and x402 are optional peers — never bundled.
     external: ['next', 'express', /^@x402\//],
   },
   {
     entry: { cli: 'src/cli.ts' },
     format: ['esm'],
-    target: 'node20',
+    target: 'node22',
     sourcemap: true,
   },
 ]);

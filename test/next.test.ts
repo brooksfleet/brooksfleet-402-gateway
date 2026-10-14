@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server.js';
 import { describe, expect, it } from 'vitest';
 
 import { createGatewayProxy } from '../src/next.js';
-import { PAY_TO, UA } from './agents.js';
+import { PAY_TO, SOL_PAY_TO, TESTNET_ACCEPTS, UA } from './agents.js';
 
 const request = (path: string, userAgent: string) =>
   new NextRequest(`https://example.com${path}`, { headers: { 'user-agent': userAgent } });
@@ -35,15 +35,21 @@ describe('createGatewayProxy — block', () => {
 
 describe('createGatewayProxy — x402', () => {
   it('validates options at creation, not on the first request', () => {
-    expect(() => createGatewayProxy({ mode: 'x402', payTo: 'nope', price: '$0.01' })).toThrow();
+    expect(() =>
+      createGatewayProxy({
+        mode: 'x402',
+        price: '$0.01',
+        accepts: [{ network: 'base-sepolia', payTo: 'nope' }],
+      }),
+    ).toThrow();
   });
 
   it('never loads x402 for traffic that passes', async () => {
     // An unreachable facilitator would fail any request that touched x402.
     const proxy = createGatewayProxy({
       mode: 'x402',
-      payTo: PAY_TO,
       price: '$0.005',
+      accepts: TESTNET_ACCEPTS,
       facilitatorUrl: 'http://127.0.0.1:9',
     });
     expect(passes(await proxy(request('/', UA.browser)))).toBe(true);
@@ -53,7 +59,7 @@ describe('createGatewayProxy — x402', () => {
 // Talks to the public testnet facilitator: X402_LIVE=1 npm test
 describe.skipIf(!process.env.X402_LIVE)('createGatewayProxy — x402 live (Base Sepolia)', () => {
   it('asks a training crawler for payment', async () => {
-    const proxy = createGatewayProxy({ mode: 'x402', payTo: PAY_TO, price: '$0.005' });
+    const proxy = createGatewayProxy({ mode: 'x402', price: '$0.005', accepts: TESTNET_ACCEPTS });
     const res = await proxy(request('/en/article', UA.gptbot));
     expect(res.status).toBe(402);
     const header = res.headers.get('payment-required');
@@ -61,6 +67,12 @@ describe.skipIf(!process.env.X402_LIVE)('createGatewayProxy — x402 live (Base 
     const required = JSON.parse(Buffer.from(header ?? '', 'base64').toString('utf8')) as {
       accepts: { payTo: string; network: string }[];
     };
-    expect(required.accepts[0]).toMatchObject({ payTo: PAY_TO, network: 'eip155:84532' });
+    expect(required.accepts).toEqual([
+      expect.objectContaining({ payTo: PAY_TO, network: 'eip155:84532' }),
+      expect.objectContaining({
+        payTo: SOL_PAY_TO,
+        network: 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
+      }),
+    ]);
   }, 30_000);
 });

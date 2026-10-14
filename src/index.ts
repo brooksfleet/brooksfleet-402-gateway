@@ -13,9 +13,12 @@ export {
   TESTNET_FACILITATOR_URL,
   resolveX402,
   type BlockOptions,
+  type ChainFamily,
   type GatewayOptions,
   type NetworkId,
+  type NetworkInfo,
   type NetworkName,
+  type PaymentTarget,
   type X402Options,
 } from './config.js';
 export { nginxMap, type NginxMapOptions } from './nginx.js';
