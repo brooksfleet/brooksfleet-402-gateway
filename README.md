@@ -75,9 +75,24 @@ npm install @x402/evm
 npm install @x402/svm @solana/kit
 ```
 
-They are optional peer dependencies: block mode never imports them, and the Solana packages
-load only when you accept a Solana network. You do **not** need `@x402/paywall` — that is a browser wallet UI for
-humans, and crawlers don't use it.
+They are optional peer dependencies: block mode never imports them, and at runtime each
+network family's package loads only when you accept a network from that family.
+
+**With a bundler** (Next.js always; NestJS or Express when built with webpack or esbuild),
+install **all** of them for x402 mode, even for networks you don't accept. The bundler
+resolves every `import()` it finds at build time, whether or not that code ever runs, so a
+missing package fails the build:
+
+```sh
+# Next.js, x402 mode
+npm install @x402/core @x402/next @x402/evm @x402/svm @solana/kit
+```
+
+On TypeScript 6, use `@solana/kit` 6.8 or newer. Earlier versions declare a peer dependency on
+TypeScript 5, and npm refuses to install it alongside TypeScript 6.
+
+You do **not** need `@x402/paywall` — that is a browser wallet UI for humans, and crawlers
+don't use it.
 
 ## Next.js
 

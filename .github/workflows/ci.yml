@@ -2,13 +2,23 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, development]
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
+  # main only takes merges from development; required by the main branch ruleset.
+  source-branch:
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull request into main comes from development
+        run: test "$HEAD_REF" = development || { echo "::error::Merge into development first; main only accepts development."; exit 1; }
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+
   test:
     runs-on: ubuntu-latest
     strategy:
