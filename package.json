@@ -1,0 +1,135 @@
+{
+  "name": "brooksfleet-402-gateway",
+  "version": "0.1.0",
+  "description": "Make AI training crawlers pay: answer them with HTTP 402 \u2014 a plain block or an x402 USDC payment \u2014 while search engines and AI search agents pass. Next.js, Express/NestJS and nginx.",
+  "keywords": [
+    "402",
+    "x402",
+    "ai-crawlers",
+    "gptbot",
+    "claudebot",
+    "robots.txt",
+    "nextjs",
+    "express",
+    "nestjs",
+    "nginx",
+    "pay-per-crawl"
+  ],
+  "license": "MIT",
+  "author": "Brooksfleet LLC <hello@brooksfleet.com>",
+  "homepage": "https://github.com/brooksfleet/brooksfleet-402-gateway#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brooksfleet/brooksfleet-402-gateway.git"
+  },
+  "bugs": {
+    "url": "https://github.com/brooksfleet/brooksfleet-402-gateway/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "bin": {
+    "brooksfleet-402-gateway": "./dist/cli.js"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./next": {
+      "import": {
+        "types": "./dist/next.d.ts",
+        "default": "./dist/next.js"
+      },
+      "require": {
+        "types": "./dist/next.d.cts",
+        "default": "./dist/next.cjs"
+      }
+    },
+    "./express": {
+      "import": {
+        "types": "./dist/express.d.ts",
+        "default": "./dist/express.js"
+      },
+      "require": {
+        "types": "./dist/express.d.cts",
+        "default": "./dist/express.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "peerDependencies": {
+    "@x402/core": "^2.28.0",
+    "@x402/evm": "^2.28.0",
+    "@x402/express": "^2.28.0",
+    "@x402/next": "^2.28.0",
+    "express": "^4.0.0 || ^5.0.0",
+    "next": ">=16.2.6"
+  },
+  "peerDependenciesMeta": {
+    "@x402/core": {
+      "optional": true
+    },
+    "@x402/evm": {
+      "optional": true
+    },
+    "@x402/express": {
+      "optional": true
+    },
+    "@x402/next": {
+      "optional": true
+    },
+    "express": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.5",
+    "@types/supertest": "^7.2.1",
+    "@x402/core": "~2.28.0",
+    "@x402/evm": "~2.28.0",
+    "@x402/express": "~2.28.0",
+    "@x402/next": "~2.28.0",
+    "eslint": "^10.12.0",
+    "express": "^5.3.0",
+    "next": "^16.4.0",
+    "prettier": "^3.9.10",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "supertest": "^7.3.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.4"
+  }
+}
