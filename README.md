@@ -4,7 +4,7 @@
 
 [![npm](https://img.shields.io/npm/v/brooksfleet-402-gateway.svg)](https://www.npmjs.com/package/brooksfleet-402-gateway)
 [![CI](https://github.com/brooksfleet/brooksfleet-402-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/brooksfleet/brooksfleet-402-gateway/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: source-available](https://img.shields.io/badge/license-source--available-blue.svg)](LICENSE)
 
 AI companies crawl the web to train their models. Your articles, docs and product pages
 are the raw material, and nobody asked. HTTP has had a status code for exactly this since
@@ -38,7 +38,8 @@ Works with **Next.js**, **Express**, **NestJS**, and — through a generated con
 - [Options](#options)
 - [The crawler list](#the-crawler-list)
 - [Limits — read before you rely on it](#limits--read-before-you-rely-on-it)
-- [Contributing](#contributing)
+- [Feature requests](#feature-requests)
+- [License](#license)
 
 ## How traffic is treated
 
@@ -59,17 +60,23 @@ Which purposes are charged is configurable — charge `ai-search` too if that is
 npm install brooksfleet-402-gateway
 ```
 
-For **block mode** that's all. For **x402 payments**, add the x402 packages for your stack:
+For **block mode** that's all. For **x402 payments**, add the x402 packages for your stack
+and the networks you accept:
 
 ```sh
 # Next.js
-npm install @x402/core @x402/evm @x402/next
+npm install @x402/core @x402/next
 # Express / NestJS
-npm install @x402/core @x402/evm @x402/express
+npm install @x402/core @x402/express
+
+# EVM networks (Base, Ethereum, Polygon, Arbitrum, Avalanche)
+npm install @x402/evm
+# Solana
+npm install @x402/svm @solana/kit
 ```
 
-They are optional peer dependencies: block mode never imports them, so they cost nothing
-until you charge. You do **not** need `@x402/paywall` — that is a browser wallet UI for
+They are optional peer dependencies: block mode never imports them, and the Solana packages
+load only when you accept a Solana network. You do **not** need `@x402/paywall` — that is a browser wallet UI for
 humans, and crawlers don't use it.
 
 ## Next.js
@@ -83,11 +90,14 @@ import { createGatewayProxy } from 'brooksfleet-402-gateway/next';
 // Block: training crawlers get a 402 "licence required".
 export const proxy = createGatewayProxy({ mode: 'block' });
 
-// Or charge them via x402 (Base Sepolia testnet until you switch):
+// Or charge them via x402 — testnets until you switch:
 // export const proxy = createGatewayProxy({
 //   mode: 'x402',
-//   payTo: process.env.X402_PAY_TO ?? '',
 //   price: '$0.005',
+//   accepts: [
+//     { network: 'solana-devnet', payTo: process.env.X402_SOLANA_ADDRESS ?? '' },
+//     { network: 'base-sepolia', payTo: process.env.X402_EVM_ADDRESS ?? '' },
+//   ],
 // });
 
 export const config = {
@@ -121,7 +131,11 @@ import { createGatewayMiddleware } from 'brooksfleet-402-gateway/express';
 const app = express();
 
 app.use(createGatewayMiddleware({ mode: 'block' }));
-// or: app.use(createGatewayMiddleware({ mode: 'x402', payTo: '0x…', price: '$0.005' }));
+// or: app.use(createGatewayMiddleware({
+//   mode: 'x402',
+//   price: '$0.005',
+//   accepts: [{ network: 'base-sepolia', payTo: '0x…' }],
+// }));
 
 app.get('/robots.txt', (_req, res) => {
   res.type('text/plain').send(renderRobotsTxt(robotsRules()));
@@ -210,29 +224,55 @@ crawler ── GET /article + PAYMENT-SIGNATURE ─────▶ gateway ─�
         ◀── 200 + content + PAYMENT-RESPONSE (receipt) ──
 ```
 
-1. **Get a receiving address** on Base. Only the **public** address goes into your config —
-   never a private key or seed phrase. Keep it in an environment variable.
-2. **Start on testnet.** `network` defaults to `base-sepolia` with the public testnet
-   facilitator, so nothing real moves while you try it.
-3. **Pick a price.** Per request, in USD, paid in USDC: `'$0.001'` to `'$0.01'` per page is
+### Networks
+
+You accept USDC on one or more networks; the crawler pays on whichever it holds funds on.
+Offering several raises the odds of getting paid.
+
+| Network | Name                                                   | Address                   | Testnet                            |
+| ------- | ------------------------------------------------------ | ------------------------- | ---------------------------------- |
+| EVM     | `base`, `ethereum`, `polygon`, `arbitrum`, `avalanche` | one `0x…` address for all | `base-sepolia`, `arbitrum-sepolia` |
+| Solana  | `solana`                                               | a base58 Solana address   | `solana-devnet`                    |
+
+### Your wallet
+
+Use a **self-custody wallet**: [Phantom](https://phantom.com) gives you a Solana address
+and an EVM address in one app, and MetaMask, Rabby or Coinbase Wallet work for EVM. Two
+rules:
+
+- **Only the public address goes into config** — in an environment variable, never in code.
+  Your private key and recovery phrase never touch the server, a repository or a ticket.
+- **Avoid exchange deposit addresses.** They are often credited on one chain only; USDC
+  arriving on another can be lost.
+
+### Step by step
+
+1. **Start on testnet.** Use `base-sepolia` and/or `solana-devnet`; the public testnet
+   facilitator is the default there, so nothing real moves while you try it. Get test USDC
+   from [Circle's faucet](https://faucet.circle.com) to pay yourself once.
+2. **Pick a price.** Per request, in USD, paid in USDC: `'$0.001'` to `'$0.01'` per page is
    where early experiments sit.
-4. **Go live:** set `network: 'base'` and a mainnet `facilitatorUrl` — for example
+3. **Go live:** switch to mainnet networks and set a mainnet `facilitatorUrl` — for example
    Coinbase CDP's (`https://api.cdp.coinbase.com/platform/v2/x402`; check its docs for
-   account and API-key requirements and fees). The gateway refuses mainnet without one,
-   and refuses the testnet facilitator on mainnet.
+   account and API-key requirements, fees and which networks it settles). Every network you
+   accept must be supported by your facilitator. The gateway refuses mainnet without a
+   facilitator, refuses the testnet facilitator on mainnet, and refuses mixing the two.
 
 ```ts
 createGatewayProxy({
   mode: 'x402',
-  payTo: process.env.X402_PAY_TO ?? '', // 0x… public address; empty fails at startup
   price: '$0.005',
-  network: 'base',
+  accepts: [
+    { network: 'solana', payTo: process.env.X402_SOLANA_ADDRESS ?? '' },
+    { network: 'base', payTo: process.env.X402_EVM_ADDRESS ?? '' },
+    { network: 'polygon', payTo: process.env.X402_EVM_ADDRESS ?? '' },
+  ],
   facilitatorUrl: process.env.X402_FACILITATOR_URL,
 });
 ```
 
-Options are validated when the gateway is created, so a bad address or price fails at
-startup — not as a 500 on the first crawler.
+Options are validated when the gateway is created, so a wrong address format, an unknown
+network or a bad price fails at startup — not as a 500 on the first crawler.
 
 In the Next.js proxy, payment is verified and settled **before** your page renders. In
 Express, settlement follows x402's middleware behaviour.
@@ -248,9 +288,8 @@ Express, settlement follows x402's middleware behaviour.
 | `purposes`       | both  | `['training']`                   | Which crawler purposes are charged    |
 | `exemptPaths`    | both  | `['/robots.txt']`                | Exact paths served to everyone        |
 | `message`        | block | "Payment required. …"            | Plain-text body of the 402            |
-| `payTo`          | x402  | —                                | Public EVM address that receives USDC |
 | `price`          | x402  | —                                | USD per request, e.g. `'$0.005'`      |
-| `network`        | x402  | `'base-sepolia'`                 | `'base'` or `'base-sepolia'`          |
+| `accepts`        | x402  | —                                | `[{ network, payTo }]` — see Networks |
 | `facilitatorUrl` | x402  | testnet facilitator on testnet   | Required on mainnet                   |
 | `description`    | x402  | "Licence to collect this page …" | Shown to the paying client            |
 
@@ -277,22 +316,26 @@ they deserve different answers.
 - **It is not legal advice.** A 402 and a robots.txt line state your terms; what they mean
   legally depends on where you and the crawler are.
 
-## Contributing
+## Feature requests
 
-Issues and pull requests are welcome — especially **crawler additions**. Please include the
-operator's documentation link for the User-Agent and what the crawler is used for, so its
-purpose is right.
+Missing a crawler, a framework or a network? **[Open an issue](https://github.com/brooksfleet/brooksfleet-402-gateway/issues)**
+— Brooksfleet maintains the code and ships improvements in new releases. For a crawler,
+include the operator's documentation link for its User-Agent and what it is used for, so its
+purpose is classified right.
 
-```sh
-npm install
-npm test               # unit tests
-X402_LIVE=1 npm test   # plus live x402 checks against the public testnet facilitator
-npm run lint && npm run typecheck && npm run build
-```
+The license does not allow modified versions or forks, so please don't patch your copy —
+ask, and it lands in the package for everyone.
 
 ## License
 
-[MIT](LICENSE) © Brooksfleet LLC
+**Brooksfleet Source-Available License 1.0** — see [LICENSE](LICENSE). In short:
+
+- **You may** install and use it, unmodified, in any project — commercial included.
+- **You may** ship it inside your built application (bundled, minified, in a container image).
+- **You may not** create modified versions, derivative works or forks, or republish the package.
+- **Changes** go through [feature requests](#feature-requests).
+
+© 2026 Brooksfleet LLC. All rights not expressly granted are reserved.
 
 ---
 
