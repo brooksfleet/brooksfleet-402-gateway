@@ -1,7 +1,7 @@
 {
   "name": "brooksfleet-402-gateway",
   "version": "0.1.0",
-  "description": "Make AI training crawlers pay: answer them with HTTP 402 \u2014 a plain block or an x402 USDC payment \u2014 while search engines and AI search agents pass. Next.js, Express/NestJS and nginx.",
+  "description": "Make AI training crawlers pay: answer them with HTTP 402 — a plain block or an x402 USDC payment — while search engines and AI search agents pass. Next.js, Express/NestJS and nginx.",
   "keywords": [
     "402",
     "x402",
@@ -40,7 +40,7 @@
     "LICENSE"
   ],
   "bin": {
-    "brooksfleet-402-gateway": "./dist/cli.js"
+    "brooksfleet-402-gateway": "dist/cli.js"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
