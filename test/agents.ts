@@ -23,5 +23,12 @@ export const UA = {
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15',
 } as const;
 
-/** A syntactically valid address nobody holds a key for — testnet only. */
+/** Syntactically valid addresses nobody holds a key for — testnet only. */
 export const PAY_TO = '0x000000000000000000000000000000000000dEaD';
+export const SOL_PAY_TO = '11111111111111111111111111111111';
+
+/** A testnet x402 config accepting Base Sepolia and Solana devnet. */
+export const TESTNET_ACCEPTS = [
+  { network: 'base-sepolia', payTo: PAY_TO },
+  { network: 'solana-devnet', payTo: SOL_PAY_TO },
+] as const;

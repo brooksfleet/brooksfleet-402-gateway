@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { GatewayOptions } from '../src/config.js';
 import { createGatewayMiddleware } from '../src/express.js';
-import { PAY_TO, UA } from './agents.js';
+import { TESTNET_ACCEPTS, UA } from './agents.js';
 
 function app(options: GatewayOptions) {
   return express()
@@ -40,8 +40,8 @@ describe('createGatewayMiddleware — x402', () => {
   it('never loads x402 for traffic that passes', async () => {
     const server = app({
       mode: 'x402',
-      payTo: PAY_TO,
       price: '$0.005',
+      accepts: TESTNET_ACCEPTS,
       facilitatorUrl: 'http://127.0.0.1:9',
     });
     const res = await request(server).get('/').set('user-agent', UA.browser);
@@ -53,7 +53,7 @@ describe.skipIf(!process.env.X402_LIVE)(
   'createGatewayMiddleware — x402 live (Base Sepolia)',
   () => {
     it('asks a training crawler for payment', async () => {
-      const server = app({ mode: 'x402', payTo: PAY_TO, price: '$0.005' });
+      const server = app({ mode: 'x402', price: '$0.005', accepts: TESTNET_ACCEPTS });
       const res = await request(server).get('/en/article').set('user-agent', UA.gptbot);
       expect(res.status).toBe(402);
       expect(res.headers['payment-required']).toBeTruthy();
