@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.2
+
+- README: receive USDC once on every network you accept before going live — without a USDC
+  account at your address every payment fails (`invalid_exact_svm_transaction_simulation_failed`
+  on Solana).
+- README: behind a reverse proxy or in a container, hand the gateway a request on your public
+  origin, or the payment request names an internal host.
+
 ## 0.1.1
 
 - README: bundled builds (Next.js, webpack, esbuild) need every x402 peer installed, including
