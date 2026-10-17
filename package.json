@@ -1,6 +1,6 @@
 {
   "name": "brooksfleet-402-gateway",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Make AI training crawlers pay: answer them with HTTP 402 — a plain block or an x402 USDC payment — while search engines and AI search agents pass. Next.js, Express/NestJS and nginx.",
   "keywords": [
     "402",

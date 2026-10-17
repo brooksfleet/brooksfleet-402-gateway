@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- Tested on Node 22, 24 and 26; developed on Node 24 LTS. Node 22 remains the minimum.
+
 ## 0.1.2
 
 - README: receive USDC once on every network you accept before going live — without a USDC
