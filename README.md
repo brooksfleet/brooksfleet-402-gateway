@@ -88,9 +88,6 @@ missing package fails the build:
 npm install @x402/core @x402/next @x402/evm @x402/svm @solana/kit
 ```
 
-On TypeScript 6, use `@solana/kit` 6.8 or newer. Earlier versions declare a peer dependency on
-TypeScript 5, and npm refuses to install it alongside TypeScript 6.
-
 You do **not** need `@x402/paywall` — that is a browser wallet UI for humans, and crawlers
 don't use it.
 
