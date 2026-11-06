@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Security audit — brooksfleet-402-gateway</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f7f7f8;
+      --border: #e3e3e6;
+      --text: #1a1a1a;
+      --text-soft: #5a5a62;
+      --accent: #2563eb;
+      --crit: #b91c1c;
+      --crit-bg: #fee2e2;
+      --high: #c2410c;
+      --high-bg: #ffedd5;
+      --mod: #a16207;
+      --mod-bg: #fef3c7;
+      --low: #166534;
+      --low-bg: #dcfce7;
+      --code-bg: #0f172a;
+      --code-text: #e2e8f0;
+      --pass: #166534;
+      --fail: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--text);
+      background: var(--bg-soft);
+      max-width: 1080px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h1 { font-size: 28px; margin: 0 0 4px; }
+    h2 { font-size: 20px; margin: 32px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    h3 { font-size: 16px; margin: 24px 0 8px; color: var(--text-soft); }
+    p { margin: 6px 0; }
+    .meta { color: var(--text-soft); font-size: 13px; margin-bottom: 16px; }
+    .meta code { background: var(--bg); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border); }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 16px 0 8px;
+    }
+    .summary-cell {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .summary-cell .label {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+    .summary-cell .count {
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .summary-cell.crit  { background: var(--crit-bg); }
+    .summary-cell.high  { background: var(--high-bg); }
+    .summary-cell.mod   { background: var(--mod-bg); }
+    .summary-cell.low   { background: var(--low-bg); }
+    .summary-cell.crit  .count { color: var(--crit); }
+    .summary-cell.high  .count { color: var(--high); }
+    .summary-cell.mod   .count { color: var(--mod); }
+    .summary-cell.low   .count { color: var(--low); }
+
+    .before-after {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--text-soft);
+    }
+    .before-after strong { color: var(--text); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 8px 0 16px;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    th {
+      background: var(--bg-soft);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+    td code {
+      background: var(--bg-soft);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .badge.crit { background: var(--crit-bg); color: var(--crit); }
+    .badge.high { background: var(--high-bg); color: var(--high); }
+    .badge.mod  { background: var(--mod-bg); color: var(--mod); }
+    .badge.low  { background: var(--low-bg); color: var(--low); }
+    .badge.pass { background: var(--low-bg); color: var(--pass); }
+    .badge.fail { background: var(--crit-bg); color: var(--fail); }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin: 8px 0 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .empty {
+      color: var(--text-soft);
+      font-style: italic;
+      padding: 8px 0;
+    }
+
+    .footer {
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+    .footer code { background: var(--bg); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Security audit — brooksfleet-402-gateway</h1>
+    <div class="meta">
+      <p><strong>Generated:</strong> 2026-11-06 15:52 +07</p>
+      <p><strong>Stack:</strong> Node.js 24 (npm), TypeScript library with Next.js, Express and x402 integrations; no server shipped</p>
+      <p><strong>Branch / commit:</strong> <code>security-audit/2026-11-06-155238 @ 21b3450</code></p>
+    </div>
+  </header>
+
+  <h2>Advisory summary</h2>
+  <div class="summary-grid">
+    <div class="summary-cell crit"><div class="label">Critical</div><div class="count">1</div></div>
+    <div class="summary-cell high"><div class="label">High</div><div class="count">8</div></div>
+    <div class="summary-cell mod"><div class="label">Moderate</div><div class="count">12</div></div>
+    <div class="summary-cell low"><div class="label">Low</div><div class="count">1</div></div>
+  </div>
+  <div class="before-after">Before: 1 critical, 8 high, 12 moderate, 1 low. After: 0 critical, 0 high, 10 moderate, 0 low. Production-only audit: 0 before and after.</div>
+
+  <h2>Advisories</h2>
+  <table><thead><tr><th>ID</th><th>Severity</th><th>Package</th><th>Title</th><th>Range</th><th>CWE</th><th>Type</th><th>Scope</th><th>Status</th></tr></thead><tbody><tr><td>GHSA-2464-fhr4-w9xw</td><td>critical</td><td>next</td><td>Next.js: Unauthenticated Remote Code Execution in Image Optimization API when SVG files are used</td><td>&gt;=16.0.0 &lt;=16.4.0</td><td>CWE-1395</td><td>direct</td><td>dev / optional peer</td><td>resolved</td></tr><tr><td>GHSA-673q-mjm6-r5xr</td><td>critical</td><td>next</td><td>Next.js: Unauthenticated Remote Code Execution in `use cache` functions returning typed arrays</td><td>&gt;=16.0.0 &lt;=16.4.0</td><td>CWE-502</td><td>direct</td><td>dev / optional peer</td><td>resolved</td></tr><tr><td>GHSA-27r3-jxmh-p828</td><td>high</td><td>body-parser</td><td>body-parser vulnerable to Denial of Service via trailing bytes after a compressed request body</td><td>&gt;=2.0.0 &lt;2.4.0</td><td>CWE-248</td><td>transitive</td><td>dev / optional peer</td><td>resolved</td></tr><tr><td>GHSA-p3m5-59mp-jv5r</td><td>high</td><td>next</td><td>Next.js: Denial of Service in App Router using Server Actions</td><td>&gt;=16.0.0 &lt;=16.4.0</td><td>CWE-770</td><td>direct</td><td>dev / optional peer</td><td>resolved</td></tr><tr><td>GHSA-mrhx-c7xc-m3w5</td><td>high</td><td>zod</td><td>Zod can exhaust memory while validating oversized constrained collections</td><td>&lt;4.6.6</td><td>CWE-770</td><td>transitive</td><td>dev / optional peer</td><td>resolved</td></tr><tr><td>GHSA-w74x-v6f9-j3xg</td><td>moderate</td><td>fast-uri</td><td>fast-uri vulnerable to URI scheme spoofing via percent-encoded scheme decoding</td><td>&gt;=3.0.0 &lt;3.1.9</td><td>CWE-172, CWE-180</td><td>transitive</td><td>dev / optional peer</td><td>resolved</td></tr><tr><td>GHSA-wjr9-j795-jxcr</td><td>moderate</td><td>fast-uri</td><td>fast-uri vulnerable to host confusion via unchecked WHATWG host canonicalization</td><td>&gt;=3.1.3 &lt;3.1.9</td><td>CWE-20, CWE-436</td><td>transitive</td><td>dev / optional peer</td><td>resolved</td></tr><tr><td>GHSA-g3hv-75wg-m249</td><td>moderate</td><td>minimatch</td><td>minimatch has potential denial of service via globparts amplification</td><td>&gt;=7.0.0 &lt;11.0.1</td><td>CWE-405</td><td>transitive</td><td>dev / optional peer</td><td>open</td></tr><tr><td>GHSA-6pq8-jhm2-2vcw</td><td>moderate</td><td>qs</td><td>qs : qs.stringify with arrayFormat &#x27;comma&#x27; throws an uncaught TypeError on array elements carrying a non-callable own toString (DoS)</td><td>&gt;=6.7.0 &lt;=6.16.0</td><td>CWE-248, CWE-704</td><td>transitive</td><td>dev / optional peer</td><td>resolved</td></tr><tr><td>GHSA-g7r4-m6w7-qqqr</td><td>low</td><td>esbuild</td><td>esbuild allows arbitrary file read when running the development server on Windows</td><td>&gt;=0.27.3 &lt;0.28.1</td><td>CWE-22</td><td>transitive</td><td>dev / optional peer</td><td>resolved</td></tr><tr><td>GHSA-xhq7-xmqj-769h</td><td>low</td><td>fast-uri</td><td>fast-uri vulnerable to improper path equivalence in relative reference normalization</td><td>&gt;=3.0.0 &lt;3.1.9</td><td>CWE-41</td><td>transitive</td><td>dev / optional peer</td><td>resolved</td></tr><tr><td>GHSA-333x-w4r6-6crp</td><td>low</td><td>fast-uri</td><td>fast-uri vulnerable to scheme injection via an unescaped first-segment colon in suffix references</td><td>&gt;=3.0.0 &lt;3.1.9</td><td>CWE-41, CWE-116</td><td>transitive</td><td>dev / optional peer</td><td>resolved</td></tr></tbody></table>
+
+  <h2>Stale direct dependencies</h2>
+  <table><thead><tr><th>Package</th><th>Current</th><th>Latest</th><th>Gap</th></tr></thead><tbody><tr><td>@solana/kit</td><td>8.5.0</td><td>8.6.0</td><td>minor</td></tr><tr><td>@types/node</td><td>22.20.5</td><td>26.6.6</td><td>major</td></tr><tr><td>@x402/core, evm, express, next, svm</td><td>2.28.0</td><td>2.30.0</td><td>minor</td></tr><tr><td>eslint</td><td>10.12.0</td><td>10.14.0</td><td>minor</td></tr><tr><td>next</td><td>16.4.0</td><td>16.4.5</td><td>patch</td></tr><tr><td>react, react-dom</td><td>19.3.0</td><td>19.3.1</td><td>patch</td></tr><tr><td>tsup</td><td>8.5.1</td><td>9.0.0</td><td>major</td></tr><tr><td>typescript</td><td>6.0.3</td><td>7.0.2</td><td>major</td></tr><tr><td>typescript-eslint</td><td>8.71.2</td><td>8.72.1</td><td>minor</td></tr><tr><td>vitest</td><td>5.0.4</td><td>5.1.0</td><td>minor</td></tr></tbody></table>
+
+  <h2>Framework-specific findings</h2>
+  <p><strong>Next.js 16.4.0</strong> was affected by two critical unauthenticated RCE advisories (GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr) and a high DoS (GHSA-p3m5-59mp-jv5r), all fixed in 16.4.1. The project now develops on 16.4.5.</p><p>Next.js is an optional peer here, so the exposure is on consumers: the 0.1.3 peer range <code>next &gt;=16.2.6</code> allows vulnerable versions. The floor is now <code>&gt;=16.4.1</code>, which reaches consumers only with a new release.</p><p><strong>React 19.3.1</strong> meets the 18.3 minimum. <strong>Express</strong> resolves body-parser 2.4.0, which clears GHSA-27r3-jxmh-p828.</p>
+
+  <h2>Upgrades applied</h2>
+  <table><thead><tr><th>Package</th><th>From</th><th>To</th><th>Type</th></tr></thead><tbody><tr><td>next</td><td>16.4.0</td><td>16.4.5</td><td>Patch (auto)</td></tr><tr><td>@x402/core, evm, express, next, svm</td><td>~2.28.0</td><td>~2.30.0</td><td>Minor (auto)</td></tr><tr><td>@solana/kit</td><td>8.5.0</td><td>8.6.0</td><td>Minor (auto)</td></tr><tr><td>eslint</td><td>10.12.0</td><td>10.14.0</td><td>Minor (auto)</td></tr><tr><td>typescript-eslint</td><td>8.71.2</td><td>8.72.1</td><td>Minor (auto)</td></tr><tr><td>react, react-dom</td><td>19.3.0</td><td>19.3.1</td><td>Patch (auto)</td></tr><tr><td>vitest</td><td>5.0.4</td><td>5.1.0</td><td>Minor (auto)</td></tr><tr><td>body-parser, qs (transitive)</td><td>2.3.x, 6.16.x</td><td>2.4.0, 6.17.1</td><td>npm audit fix</td></tr><tr><td>tsup</td><td>8.5.1</td><td>9.0.0</td><td>Major (accepted)</td></tr><tr><td>@types/node</td><td>~22.20.5</td><td>^26.6.6</td><td>Major (accepted)</td></tr><tr><td>typescript</td><td>6.0.3</td><td>7.0.2</td><td>Major (accepted, not applied: lint and build fail)</td></tr><tr><td>peer: next</td><td>&gt;=16.2.6</td><td>&gt;=16.4.1</td><td>Peer floor (accepted)</td></tr><tr><td>peer: @x402/*</td><td>^2.28.0</td><td>^2.30.0</td><td>Peer floor (accepted)</td></tr><tr><td>peer: @solana/kit</td><td>&gt;=5.1.0</td><td>&gt;=8.0.0</td><td>Peer floor (accepted)</td></tr></tbody></table>
+
+  <h2>Build verification</h2>
+  <pre>Node 24.22.1 (working tree): format:check, lint, typecheck, test, build all pass
+Node 22.23.1 (clean npm ci):  lint, typecheck, test, build all pass
+Node 26.12.1 (clean npm ci):  lint, typecheck, test, build all pass
+Tests: 51 passed, 2 skipped (53)
+
+TypeScript 7.0.2 trial in a scratch copy, not applied:
+  typecheck passes
+  lint fails: &quot;typescript-eslint does not support TS 7.0.&quot;
+  build exits 1 under tsup 9</pre>
+
+  <h2>Indicators of compromise</h2>
+  <p>None. No risky primitives in <code>src</code>, <code>test</code>, config or workflows. No native binaries newer than the lockfile before the upgrade. No matches for the known incident indicators. No deploy environment applies, so outbound traffic was not checked.</p>
+
+  <h2>CI gate recommendation</h2>
+  <p>The existing gate, <code>npm audit --audit-level=high --omit=dev</code>, cannot catch these advisories: the package has no runtime dependencies, so <code>--omit=dev</code> audits nothing. Recommended: drop <code>--omit=dev</code> so x402 and Next.js, which are installed as dev dependencies, are audited. The remaining moderates would not fail a high-level gate. Not changed in this audit.</p><p>Open: 10 moderate findings from one advisory, GHSA-g3hv-75wg-m249 (minimatch below 11.0.1). eslint and typescript-eslint require minimatch 10.x, so the fix needs upstream releases. It is dev-only.</p>
+
+  <h2>Manifest diff</h2>
+  <pre>diff --git a/package.json b/package.json
+index 7cb6711..4af9dca 100644
+--- a/package.json
++++ b/package.json
+@@ -88,14 +88,14 @@
+     &quot;prepublishOnly&quot;: &quot;npm run lint &amp;&amp; npm run typecheck &amp;&amp; npm test &amp;&amp; npm run build&quot;
+   },
+   &quot;peerDependencies&quot;: {
+-    &quot;@solana/kit&quot;: &quot;&gt;=5.1.0&quot;,
+-    &quot;@x402/core&quot;: &quot;^2.28.0&quot;,
+-    &quot;@x402/evm&quot;: &quot;^2.28.0&quot;,
+-    &quot;@x402/express&quot;: &quot;^2.28.0&quot;,
+-    &quot;@x402/next&quot;: &quot;^2.28.0&quot;,
+-    &quot;@x402/svm&quot;: &quot;^2.28.0&quot;,
++    &quot;@solana/kit&quot;: &quot;&gt;=8.0.0&quot;,
++    &quot;@x402/core&quot;: &quot;^2.30.0&quot;,
++    &quot;@x402/evm&quot;: &quot;^2.30.0&quot;,
++    &quot;@x402/express&quot;: &quot;^2.30.0&quot;,
++    &quot;@x402/next&quot;: &quot;^2.30.0&quot;,
++    &quot;@x402/svm&quot;: &quot;^2.30.0&quot;,
+     &quot;express&quot;: &quot;^4.0.0 || ^5.0.0&quot;,
+-    &quot;next&quot;: &quot;&gt;=16.2.6&quot;
++    &quot;next&quot;: &quot;&gt;=16.4.1&quot;
+   },
+   &quot;peerDependenciesMeta&quot;: {
+     &quot;@solana/kit&quot;: {
+@@ -125,25 +125,25 @@
+   },
+   &quot;devDependencies&quot;: {
+     &quot;@eslint/js&quot;: &quot;^10.0.1&quot;,
+-    &quot;@solana/kit&quot;: &quot;^8.5.0&quot;,
++    &quot;@solana/kit&quot;: &quot;^8.6.0&quot;,
+     &quot;@types/express&quot;: &quot;^5.0.6&quot;,
+-    &quot;@types/node&quot;: &quot;~22.20.5&quot;,
++    &quot;@types/node&quot;: &quot;^26.6.6&quot;,
+     &quot;@types/supertest&quot;: &quot;^7.2.1&quot;,
+-    &quot;@x402/core&quot;: &quot;~2.28.0&quot;,
+-    &quot;@x402/evm&quot;: &quot;~2.28.0&quot;,
+-    &quot;@x402/express&quot;: &quot;~2.28.0&quot;,
+-    &quot;@x402/next&quot;: &quot;~2.28.0&quot;,
+-    &quot;@x402/svm&quot;: &quot;~2.28.0&quot;,
+-    &quot;eslint&quot;: &quot;^10.12.0&quot;,
++    &quot;@x402/core&quot;: &quot;~2.30.0&quot;,
++    &quot;@x402/evm&quot;: &quot;~2.30.0&quot;,
++    &quot;@x402/express&quot;: &quot;~2.30.0&quot;,
++    &quot;@x402/next&quot;: &quot;~2.30.0&quot;,
++    &quot;@x402/svm&quot;: &quot;~2.30.0&quot;,
++    &quot;eslint&quot;: &quot;^10.14.0&quot;,
+     &quot;express&quot;: &quot;^5.3.0&quot;,
+-    &quot;next&quot;: &quot;^16.4.0&quot;,
++    &quot;next&quot;: &quot;^16.4.5&quot;,
+     &quot;prettier&quot;: &quot;^3.9.10&quot;,
+-    &quot;react&quot;: &quot;^19.3.0&quot;,
+-    &quot;react-dom&quot;: &quot;^19.3.0&quot;,
++    &quot;react&quot;: &quot;^19.3.1&quot;,
++    &quot;react-dom&quot;: &quot;^19.3.1&quot;,
+     &quot;supertest&quot;: &quot;^7.3.1&quot;,
+-    &quot;tsup&quot;: &quot;^8.5.1&quot;,
++    &quot;tsup&quot;: &quot;^9.0.0&quot;,
+     &quot;typescript&quot;: &quot;~6.0&quot;,
+-    &quot;typescript-eslint&quot;: &quot;^8.71.2&quot;,
+-    &quot;vitest&quot;: &quot;^5.0.4&quot;
++    &quot;typescript-eslint&quot;: &quot;^8.72.1&quot;,
++    &quot;vitest&quot;: &quot;^5.1.0&quot;
+   }
+ }
+
+package-lock.json (stat only, full diff omitted):
+ package-lock.json | 3882 ++++++++++++++---------------------------------------
+ 1 file changed, 1031 insertions(+), 2851 deletions(-)
+</pre>
+
+  <footer class="footer">
+    <p>Report generated by the <code>project-security-audit</code> skill. Inputs were captured from the project working tree at the timestamp above; advisory data reflects the upstream registry / advisory feed at that moment.</p>
+    <p>This report is committed alongside the manifest and lockfile changes on the audit branch. To review what changed: <code>git diff &lt;base&gt;...HEAD</code>.</p>
+  </footer>
+
+</body>
+</html>
