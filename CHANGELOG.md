@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+- Breaking: peer dependency floors raised to `next` 16.4.1, `@x402/*` 2.30.0 and `@solana/kit`
+  8.0.0. Earlier versions are affected by security advisories or are not supported by x402 2.30.
+- Security: excludes the Next.js remote code execution advisories GHSA-2464-fhr4-w9xw and
+  GHSA-673q-mjm6-r5xr, the Next.js denial of service GHSA-p3m5-59mp-jv5r, and the Zod memory
+  exhaustion GHSA-mrhx-c7xc-m3w5 that reaches x402 below 2.30.
+
 ## 0.1.3
 
 - Tested on Node 22, 24 and 26; developed on Node 24 LTS. Node 22 remains the minimum.
